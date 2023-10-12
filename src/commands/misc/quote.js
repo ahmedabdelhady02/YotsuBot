@@ -1,29 +1,45 @@
+const { Client, Interaction, ApplicationCommandOptionType } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
+const Quote = require('../../models/Quote');
 
 module.exports = {
-  name: 'quote',
-  description: 'Replies with a profound quote.',
-  // devOnly: Boolean,
-  // testOnly: Boolean,
-  // options: Object[]
+  /**
+   *
+   * @param {Client} client
+   * @param {Interaction} interaction
+   */
 
   callback: async (client, interaction) => {
+    const quoteAuthorId = interaction.options.get('quote-author').value;
+    const quote = interaction.options.get('quote').value;
+    const quoteAuthor = await interaction.guild.members.fetch(quoteAuthorId);
+
     await interaction.deferReply();
 
-    const filePath = path.join(__dirname, '..', '..', 'quote.txt');
-
-    fs.readFile(filePath, 'utf-8', (err, data) => {
-      if (err) {
-        console.error('Error reading the file:', err);
-        return;
-      }
-
-      // splitting the file content by new line to get an array of lines
-      const lines = data.split('\n');
-      const quote = lines[Math.floor(Math.random() * lines.length)];
-      interaction.editReply(`${quote}`);
-      //console.log(lines);
+    const newQuote = new Quote({
+      userId: quoteAuthorId,
+      guildId: interaction.guildId,
+      quote: quote,
     });
+    await newQuote.save();
+    interaction.editReply(`Quote added.\n"${quote}" - ${quoteAuthor}`);
   },
+
+  name: 'quote',
+  description: 'Quote a user.',
+  options: [
+    {
+      name: 'quote',
+      description: 'The quote.',
+      required: true,
+      type: ApplicationCommandOptionType.String,
+    },
+    {
+      name: 'quote-author',
+      description: 'The person being quoted.',
+      required: true,
+      type: ApplicationCommandOptionType.Mentionable,
+    },
+  ],
 };
