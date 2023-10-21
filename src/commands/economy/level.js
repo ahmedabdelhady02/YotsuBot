@@ -49,7 +49,7 @@ module.exports = {
       .setLevel(fetchedLevel.level)
       .setCurrentXP(fetchedLevel.xp)
       .setRequiredXP(calculateLevelXp(fetchedLevel.level))
-      .setStatus(targetUserObject.presence.status)
+      .setStatus(targetUserObject.presence?.status || 'offline')
       .setProgressBar(['#FFC300', '#c300ff'], 'GRADIENT')
       .setUsername(targetUserObject.user.username);
     //.setDiscriminator(targetUserObject.user.discriminator);
